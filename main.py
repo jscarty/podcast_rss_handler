@@ -1,24 +1,35 @@
 
 import xml.etree.ElementTree as ET
 import os
+import feedparser
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
-def main(rss_file):
+def main(rss_file, rss_file_two):
 
-    file = os.path.join(os.getcwd(), rss_file)
-    tree = ET.parse(file)
-    print(tree)
-    root = tree.getroot()
+    file = os.path.join(os.getcwd(), rss_file_two)
+    feed =  feedparser.parse(file)
+    print(feed['feed']['title'])
+    print(feed['feed']['description'])
+    for entry in feed.entries:
+        print(entry.title)
+        print(entry.published)
+        print(entry.link)
+#   tree = ET.parse(file)
+#   print(tree)
+#   root = tree.getroot()
 
-    new_kids = []
-    for child in root[0]:
-        for kids in child:
-            # print(f"Tag: {kids.tag} Text: {kids.text}")
-            if "enclosure url" == kids.tag:
-                print(f"Tag: {kids.tag} Text: {kids.text}")
-            elif "title" == kids.tag:
-                print(f"Tag: {kids.tag} Text: {kids.text}")
-            elif "link" == kids.tag:
-                print(f"Tag: {kids.tag} Text: {kids.text}")
+#   new_kids = []
+#   for child in root[0]:
+#       for kids in child:
+#           # print(f"Tag: {kids.tag} Text: {kids.text}")
+#           if "enclosure url" == kids.tag:
+#               print(f"Tag: {kids.tag} Text: {kids.text}")
+#           elif "title" == kids.tag:
+#               print(f"Tag: {kids.tag} Text: {kids.text}")
+#           elif "link" == kids.tag:
+#               print(f"Tag: {kids.tag} Text: {kids.text}")
 
             # print(kids.text)
         # new_kids.append(child.getchildren())
