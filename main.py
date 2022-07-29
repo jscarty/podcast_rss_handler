@@ -2,9 +2,8 @@
 import xml.etree.ElementTree as ET
 import os
 import feedparser
-import gi
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+import tkinter as tk
+# https://en.wikipedia.org/wiki/Tkinter
 
 def main(rss_file, rss_file_two):
 
@@ -12,10 +11,13 @@ def main(rss_file, rss_file_two):
     feed =  feedparser.parse(file)
     print(feed['feed']['title'])
     print(feed['feed']['description'])
-    for entry in feed.entries:
-        print(entry.title)
-        print(entry.published)
-        print(entry.link)
+    print('----------')
+    print(feed.entries)
+    print('----------')
+    # for entry in feed.entries:
+    #     print(entry.title)
+    #     print(entry.published)
+    #     print(entry.link)
 #   tree = ET.parse(file)
 #   print(tree)
 #   root = tree.getroot()
