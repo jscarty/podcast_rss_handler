@@ -13,27 +13,28 @@ class Feed:
         root.title("RSS Feed")
 
         mainframe = ttk.Frame(root, padding="10 10 12 12")
-        mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+        self.mainframe = mainframe
+        self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
-        self.title_list = Listbox(mainframe, height=20, width=40)
+        self.title_list = Listbox(self.mainframe, height=20, width=40)
         self.title_list.bind('<<ListboxSelect>>', self.show_episode_description)
-        self.status_message = StringVar()
-        self.scrollbar = ttk.Scrollbar(mainframe, orient=VERTICAL, command=self.title_list.yview)
-        # self.status = ttk.Label(mainframe, textvariable=self.status_message, anchor=W).grid(row=3, column=6, columnspan=4)
-        self.status = HTMLLabel(mainframe)
+        # self.status_message = StringVar()
+        self.scrollbar = ttk.Scrollbar(self.mainframe, orient=VERTICAL, command=self.title_list.yview)
+        # self.status = ttk.Label(self.mainframe, textvariable=self.status_message, anchor=W).grid(row=3, column=6, columnspan=4)
+        self.status = HTMLLabel(self.mainframe)
         self.status.grid(row=3, column=6, columnspan=4)
         self.feed_location = StringVar()
-        feed_entry = ttk.Entry(mainframe, width=30, textvariable=self.feed_location)
+        feed_entry = ttk.Entry(self.mainframe, width=30, textvariable=self.feed_location)
         feed_entry.grid(column=3, row=1, sticky=(W, E))
-        ttk.Label(mainframe, text="Feed").grid(column=2, row=1, sticky=(W, E))
+        ttk.Label(self.mainframe, text="Feed").grid(column=2, row=1, sticky=(W, E))
         description = StringVar()
-        self.description_message = ttk.Label(mainframe, textvariable=description, anchor='w')
+        self.description_message = ttk.Label(self.mainframe, textvariable=description, anchor='w')
 
-        ttk.Button(mainframe, text="Get Feed", command=self.get_feed_from_url).grid(column=4, row=1, sticky=E)
+        ttk.Button(self.mainframe, text="Get Feed", command=self.get_feed_from_url).grid(column=4, row=1, sticky=E)
 
-        ttk.Label(mainframe, text="Titles").grid(column=2, row=2, sticky=(W, E))
-        ttk.Button(mainframe, text="Get Titles", command=self.print_episode_titles).grid(column=3, row=2, sticky=W)
+        ttk.Label(self.mainframe, text="Titles").grid(column=2, row=2, sticky=(W, E))
+        ttk.Button(self.mainframe, text="Get Titles", command=self.print_episode_titles).grid(column=3, row=2, sticky=W)
 
         feed_entry.focus()
 
@@ -55,7 +56,6 @@ class Feed:
 
     def print_episode_titles(self, *args):
 
-        titles = []
         print(type(self.feed_object))
         for index, episode in enumerate(self.feed_object.entries):
 
@@ -73,9 +73,14 @@ class Feed:
         root.grid_columnconfigure(0, weight=1)
         root.grid_rowconfigure(0, weight=1)
         self.title_list.bind('<<>ListboxSelect>', self.show_episode_description())
-        # titles_string = StringVar(value=titles)
-        # Listbox  = Listbox(ma)
-        # ttk.Label(mainframe, textvariable=self.)
+
+        self.download_name = StringVar()
+        filename_to_download = ttk.Entry(self.mainframe, width=30, textvariable=self.download_name)
+        filename_to_download.grid(column=3, row=4, sticky=(S))
+        ttk.Label(self.mainframe, text="Episode name").grid(column=2, row=4, sticky=(W, S))
+        ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode())
+
+
     def show_episode_description(self, *args):
 
         indexs = self.title_list.curselection()
@@ -96,6 +101,7 @@ class Feed:
     def download_episode(self, *args):
         print('hello')
         # urllib.request.urlretrieve("http://www.example.com/songs/mp3.mp3", "mp3.mp3")
+
     # def display_description(self, *args):
     #     print('working')
     #     description = StringVar()
