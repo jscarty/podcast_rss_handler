@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinterhtml import HtmlFrame
 from tkhtmlview import HTMLLabel
+import urllib.request
 
 class Feed:
 
@@ -29,10 +30,10 @@ class Feed:
         description = StringVar()
         self.description_message = ttk.Label(mainframe, textvariable=description, anchor='w')
 
-        ttk.Button(mainframe, text="Get Feed", command=self.get_feed_from_url).grid(column=6, row=1, sticky=E)
+        ttk.Button(mainframe, text="Get Feed", command=self.get_feed_from_url).grid(column=4, row=1, sticky=E)
 
-        ttk.Label(mainframe, text="Titles").grid(column=2, row=3, sticky=(W, E))
-        ttk.Button(mainframe, text="Get Titles", command=self.print_episode_titles).grid(column=3, row=3, sticky=W)
+        ttk.Label(mainframe, text="Titles").grid(column=2, row=2, sticky=(W, E))
+        ttk.Button(mainframe, text="Get Titles", command=self.print_episode_titles).grid(column=3, row=2, sticky=W)
 
         feed_entry.focus()
 
@@ -61,12 +62,12 @@ class Feed:
             # print(f"episode number is {episode_number} and title is {episode.title}")
             self.title_list.insert(index, episode.title)
 
-            self.title_list.grid(column=1, row=4, columnspan=3, rowspan=2)
+            self.title_list.grid(column=1, row=3, columnspan=3, rowspan=2)
 
 
             # self.title_list.pack()
             # yield episode.title
-        self.scrollbar.grid(column=5, row=4, sticky=(N, S))
+        self.scrollbar.grid(column=4, row=3, sticky=(N, S))
         self.title_list['yscrollcommand'] = self.scrollbar.set
         # self.title_list.configure(yscrollcommand= self.scrollbar.set)
         root.grid_columnconfigure(0, weight=1)
@@ -92,6 +93,9 @@ class Feed:
             Hopefully it will be updated on pypi
             """
 
+    def download_episode(self, *args):
+        print('hello')
+        # urllib.request.urlretrieve("http://www.example.com/songs/mp3.mp3", "mp3.mp3")
     # def display_description(self, *args):
     #     print('working')
     #     description = StringVar()
