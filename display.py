@@ -6,6 +6,7 @@ from tkinterhtml import HtmlFrame
 from tkhtmlview import HTMLLabel
 import urllib.request
 
+# https://archive81.libsyn.com/rss
 class Feed:
 
     def __init__(self, root):
@@ -64,7 +65,6 @@ class Feed:
 
             self.title_list.grid(column=1, row=3, columnspan=3, rowspan=2)
 
-
             # self.title_list.pack()
             # yield episode.title
         self.scrollbar.grid(column=4, row=3, sticky=(N, S))
@@ -72,14 +72,15 @@ class Feed:
         # self.title_list.configure(yscrollcommand= self.scrollbar.set)
         root.grid_columnconfigure(0, weight=1)
         root.grid_rowconfigure(0, weight=1)
+        self.title_list.select_set(0)
         self.title_list.bind('<<>ListboxSelect>', self.show_episode_description())
 
         self.download_name = StringVar()
         filename_to_download = ttk.Entry(self.mainframe, width=30, textvariable=self.download_name)
         filename_to_download.grid(column=3, row=4, sticky=(S))
         ttk.Label(self.mainframe, text="Episode name").grid(column=2, row=4, sticky=(W, S))
-        ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode())
-
+        self.select_episode_index = None
+        ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode()).grid(column=4, row=4, sticky=(E, S))
 
     def show_episode_description(self, *args):
 
@@ -89,6 +90,7 @@ class Feed:
             index = int(indexs[0])
 
             episode = self.feed_object.entries[index]
+            self.select_episode_index = index
 
             self.status.set_html(episode.description)
             """
@@ -100,6 +102,17 @@ class Feed:
 
     def download_episode(self, *args):
         print('hello')
+        try:
+            download_name = self.download_name.get()
+            if self.select_episode_index is None:
+                print(f"select episode has not been chosen yet.")
+            else:
+                download_location = self.feed_object.entries[self.select_episode_index]
+                print(f'Printing {download_location} with the file name {download_name}')
+            # episode = urllib.request.urlretrieve(download_location.link, download_name)
+
+        except ValueError: "file_not_downloaded"
+        # pass
         # urllib.request.urlretrieve("http://www.example.com/songs/mp3.mp3", "mp3.mp3")
 
     # def display_description(self, *args):
