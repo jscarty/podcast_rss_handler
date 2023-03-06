@@ -36,6 +36,7 @@ class Feed:
 
         ttk.Label(self.mainframe, text="Titles").grid(column=2, row=2, sticky=(W, E))
         ttk.Button(self.mainframe, text="Get Titles", command=self.print_episode_titles).grid(column=3, row=2, sticky=W)
+        self.filename_to_download = ttk.Entry(self.mainframe, width=30)
 
         feed_entry.focus()
 
@@ -76,11 +77,12 @@ class Feed:
         self.title_list.bind('<<>ListboxSelect>', self.show_episode_description())
 
         self.download_name = StringVar()
-        filename_to_download = ttk.Entry(self.mainframe, width=30, textvariable=self.download_name)
-        filename_to_download.grid(column=3, row=4, sticky=(S))
+        # filename_to_download = ttk.Entry(self.mainframe, width=30)
+        self.filename_to_download.grid(column=3, row=4, sticky=(S))
+
         ttk.Label(self.mainframe, text="Episode name").grid(column=2, row=4, sticky=(W, S))
         self.select_episode_index = None
-        ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode()).grid(column=4, row=4, sticky=(E, S))
+        ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode).grid(column=4, row=4, sticky=(E, S))
 
     def show_episode_description(self, *args):
 
@@ -99,6 +101,10 @@ class Feed:
             
             Hopefully it will be updated on pypi
             """
+            # , textvariable = self.download_name
+            self.filename_to_download.delete(0, END)
+            self.filename_to_download.insert(0, episode.title + '.mp3')
+            print(episode.title)
 
     def download_episode(self, *args):
         print('hello')
@@ -108,7 +114,8 @@ class Feed:
                 print(f"select episode has not been chosen yet.")
             else:
                 download_location = self.feed_object.entries[self.select_episode_index]
-                print(f'Printing {download_location} with the file name {download_name}')
+                print(self.filename_to_download.get())
+                print(f'Printing {download_location.title} with the file name \" {download_name} \" ')
             # episode = urllib.request.urlretrieve(download_location.link, download_name)
 
         except ValueError: "file_not_downloaded"
