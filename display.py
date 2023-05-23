@@ -2,9 +2,13 @@ import os
 import feedparser
 from tkinter import *
 from tkinter import ttk
-from tkinterhtml import HtmlFrame
 from tkhtmlview import HTMLLabel
-import urllib.request
+import threading
+import queue
+from functools import partial
+import os
+import requests
+
 
 # https://archive81.libsyn.com/rss
 class Feed:
@@ -106,6 +110,12 @@ class Feed:
             self.filename_to_download.insert(0, episode.title + '.mp3')
             print(episode.title)
 
+
+    def download_episode_wrapper(self, *args):
+        q = queue.Queue()
+        progress = ttk.Progressbar(self.mainframe, orient='horizontal', mode='determinate', length=280)
+        progress.grid(column=5, row=4, sticky=(E, S))
+        update_handler = partial(self.updater, progress, q)
     def download_episode(self, *args):
         print('hello')
         try:
@@ -116,17 +126,50 @@ class Feed:
                 download_location = self.feed_object.entries[self.select_episode_index]
                 print(self.filename_to_download.get())
                 print(f'Printing {download_location.title} with the file name \" {download_name} \" ')
-            # episode = urllib.request.urlretrieve(download_location.link, download_name)
+                curent_dir = os.path.abspath(os.getcwd())
+
+                download_path = os.path.join(curent_dir, self.filename_to_download.get())
+                # download = requests.get(download_location.link, allow_redirects=False)
+                print(download_location)
+                print(download_location.link)
+                print(download_location.links[0]['href'])
+                print(download_location.links[0])
+                q = queue.Queue()
+                progress = ttk.Progressbar(self.mainframe, orient='horizontal', mode='determinate', length=280 )
+                progress.grid( column=5, row=4, sticky=(E, S) )
+                update_handler = partial(self.updater, progress, q)
+                self.mainframe.bind('<<Progress>>', update_handler)
+                thread = threading.Thread(target=do wnload, args=(self.mainframe, q), daemon=True)
+                with requests.get(download_location.links[0]['href'], stream=True) as download:
+                    download.raise_for_status()
+                    print(download.status_code)
+                    file_size = int(download.headers.get('Content-Length'))
+                    progress["maximum"] = file_size
+                    chunks = 0
+                    with open(download_path, 'wb') as file:
+                        for chunk in download.iter_content(chunk_size=30):
+                            file.write(chunk)
+                            q.put(len(chunk)/ file_size * 100)
+                            self.mainframe.event_generate('<<Progress>>')
+
+                            # chunks_as_len = (len(chunk))
+                            # chunks += int(chunks_as_len)
+                            # progress["value"] += int(chunks_as_len)
+                            # # progress["value"] = chunk
+                        self.mainframe.event_generate('<<Done>>')
+                        print('done')
+                        print('Chunks total: ' + str(chunks))
+                        print("file size: " + str(file_size))
+
+                # open(download_path, 'wb').write(download.content)
+                # episode = urllib.request.urlretrieve(download_location.link, download_name)
 
         except ValueError: "file_not_downloaded"
         # pass
         # urllib.request.urlretrieve("http://www.example.com/songs/mp3.mp3", "mp3.mp3")
 
-    # def display_description(self, *args):
-    #     print('working')
-    #     description = StringVar()
-
-
+    def updater(self, progressbar, q, event):
+        progressbar["value"] += q.get()
 root = Tk()
 Feed(root)
 root.mainloop()
