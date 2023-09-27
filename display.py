@@ -116,6 +116,23 @@ class Feed:
         progress = ttk.Progressbar(self.mainframe, orient='horizontal', mode='determinate', length=280)
         progress.grid(column=5, row=4, sticky=(E, S))
         update_handler = partial(self.updater, progress, q)
+
+    def download(self, q, download_file, destination):
+        print('working')
+        response = requests.get(download_file, stream=True)
+        file_size = int(response.headers.get('Content-Length'))
+        with open(destination, 'wb') as file:
+            for chunk in response.iter_content(chunk_size=30):
+                file.write(chunk)
+                q.put(len(chunk)/ file_size * 100)
+                self.event_generate('<<Progress>>')
+        self.event_generate('<<Done>>')
+        # with requests.get(download_file, stream=True) as downloading:
+        #     downloading.raise_for_status()
+        #     file_size = int(downloading.headers.get('Content-Length'))
+
+    def updater(pb, q, event):
+        pb['value'] += q.get()
     def download_episode(self, *args):
         print('hello')
         try:
@@ -130,36 +147,50 @@ class Feed:
 
                 download_path = os.path.join(curent_dir, self.filename_to_download.get())
                 # download = requests.get(download_location.link, allow_redirects=False)
+                print('break')
                 print(download_location)
+                print('link below')
                 print(download_location.link)
-                print(download_location.links[0]['href'])
-                print(download_location.links[0])
+                print('break')
+                # print(download_location.links[0]['href'])
+                # print(download_location.links[0])
+                download_from = 0
+                for dictionary in download_location.links:
+                    if dictionary.type == 'audio/mpeg':
+                        download_from = dictionary.href
+                        break
+
+                print(download_from)
                 q = queue.Queue()
                 progress = ttk.Progressbar(self.mainframe, orient='horizontal', mode='determinate', length=280 )
+                # progress.pack(padd=20)
                 progress.grid( column=5, row=4, sticky=(E, S) )
                 update_handler = partial(self.updater, progress, q)
-                self.mainframe.bind('<<Progress>>', update_handler)
-                thread = threading.Thread(target=do wnload, args=(self.mainframe, q), daemon=True)
-                with requests.get(download_location.links[0]['href'], stream=True) as download:
-                    download.raise_for_status()
-                    print(download.status_code)
-                    file_size = int(download.headers.get('Content-Length'))
-                    progress["maximum"] = file_size
-                    chunks = 0
-                    with open(download_path, 'wb') as file:
-                        for chunk in download.iter_content(chunk_size=30):
-                            file.write(chunk)
-                            q.put(len(chunk)/ file_size * 100)
-                            self.mainframe.event_generate('<<Progress>>')
 
-                            # chunks_as_len = (len(chunk))
-                            # chunks += int(chunks_as_len)
-                            # progress["value"] += int(chunks_as_len)
-                            # # progress["value"] = chunk
-                        self.mainframe.event_generate('<<Done>>')
-                        print('done')
-                        print('Chunks total: ' + str(chunks))
-                        print("file size: " + str(file_size))
+                self.mainframe.bind('<<Progress>>', update_handler)
+                download = self.download( q, download_from, download_path)
+                thread = threading.Thread(target=self.download, args=(q, download_from, download_location), daemon=True)
+                thread.start
+                # with requests.get(download_location.links[0]['href'], stream=True) as download:
+                #     download.raise_for_status()
+                #     print(download.status_code)
+                #     file_size = int(download.headers.get('Content-Length'))
+                #     progress["maximum"] = file_size
+                #     chunks = 0
+                #     with open(download_path, 'wb') as file:
+                #         for chunk in download.iter_content(chunk_size=30):
+                #             file.write(chunk)
+                #             q.put(len(chunk)/ file_size * 100)
+                #             self.mainframe.event_generate('<<Progress>>')
+                #
+                #             # chunks_as_len = (len(chunk))
+                #             # chunks += int(chunks_as_len)
+                #             # progress["value"] += int(chunks_as_len)
+                #             # # progress["value"] = chunk
+                #         self.mainframe.event_generate('<<Done>>')
+                #         print('done')
+                #         print('Chunks total: ' + str(chunks))
+                #         print("file size: " + str(file_size))
 
                 # open(download_path, 'wb').write(download.content)
                 # episode = urllib.request.urlretrieve(download_location.link, download_name)
@@ -168,8 +199,8 @@ class Feed:
         # pass
         # urllib.request.urlretrieve("http://www.example.com/songs/mp3.mp3", "mp3.mp3")
 
-    def updater(self, progressbar, q, event):
-        progressbar["value"] += q.get()
+
+
 root = Tk()
 Feed(root)
 root.mainloop()
