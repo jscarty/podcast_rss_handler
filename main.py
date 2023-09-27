@@ -8,7 +8,8 @@ import tkinter as tk
 def main(rss_file, rss_file_two):
 
     file = os.path.join(os.getcwd(), rss_file_two)
-    feed =  feedparser.parse(file)
+    # feed = feedparser.parse(file)
+    feed = feedparser.parse('https://archive81.libsyn.com/rss')
     print(feed['feed']['title'])
     print(feed['feed']['description'])
     print('----------')

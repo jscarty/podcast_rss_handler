@@ -122,17 +122,20 @@ class Feed:
         response = requests.get(download_file, stream=True)
         file_size = int(response.headers.get('Content-Length'))
         with open(destination, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=30):
+            for chunk in response.iter_content(chunk_size=100_000):
                 file.write(chunk)
                 q.put(len(chunk)/ file_size * 100)
-                self.event_generate('<<Progress>>')
-        self.event_generate('<<Done>>')
+
+                self.mainframe.event_generate('<<Progress>>')
+        self.mainframe.event_generate('<<Done>>')
         # with requests.get(download_file, stream=True) as downloading:
         #     downloading.raise_for_status()
         #     file_size = int(downloading.headers.get('Content-Length'))
 
-    def updater(pb, q, event):
+    def updater(self, pb, q, event):
         pb['value'] += q.get()
+    def download_complete(self):
+        print('FINISHED')
     def download_episode(self, *args):
         print('hello')
         try:
@@ -145,15 +148,8 @@ class Feed:
                 print(f'Printing {download_location.title} with the file name \" {download_name} \" ')
                 curent_dir = os.path.abspath(os.getcwd())
 
-                download_path = os.path.join(curent_dir, self.filename_to_download.get())
-                # download = requests.get(download_location.link, allow_redirects=False)
-                print('break')
-                print(download_location)
-                print('link below')
-                print(download_location.link)
-                print('break')
-                # print(download_location.links[0]['href'])
-                # print(download_location.links[0])
+                download_destination = os.path.join(curent_dir, self.filename_to_download.get())
+
                 download_from = 0
                 for dictionary in download_location.links:
                     if dictionary.type == 'audio/mpeg':
@@ -166,11 +162,14 @@ class Feed:
                 # progress.pack(padd=20)
                 progress.grid( column=5, row=4, sticky=(E, S) )
                 update_handler = partial(self.updater, progress, q)
-
                 self.mainframe.bind('<<Progress>>', update_handler)
-                download = self.download( q, download_from, download_path)
-                thread = threading.Thread(target=self.download, args=(q, download_from, download_location), daemon=True)
-                thread.start
+
+                thread = threading.Thread(target=self.download, args=( q , download_from, download_destination), daemon=True)
+                print('start')
+                print(download_destination)
+                thread.start()
+                print('working')
+                self.mainframe.bind('<<Done>>', lambda event: self.download_complete() )
                 # with requests.get(download_location.links[0]['href'], stream=True) as download:
                 #     download.raise_for_status()
                 #     print(download.status_code)
