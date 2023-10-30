@@ -1,4 +1,6 @@
 import os
+import tkinter
+
 import feedparser
 from tkinter import *
 from tkinter import ttk
@@ -19,9 +21,18 @@ class Feed:
 
         mainframe = ttk.Frame(root, padding="10 10 12 12")
         self.mainframe = mainframe
+
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
+        self.right_click = ttk.Label(root, text="Right click menu")
+        # self.right_click.pack()
+        self.menu = tkinter.Menu(root, tearoff=0)
+        self.menu.add_command(label="Cut")
+        self.menu.add_command(label="Copy")
+        self.menu.add_command(label="Paste")
+        self.menu.add_separator()
+        self.right_click.bind("<Button-3>", self.do_popup)
         self.title_list = Listbox(self.mainframe, height=20, width=40)
         self.title_list.bind('<<ListboxSelect>>', self.show_episode_description)
         # self.status_message = StringVar()
@@ -44,7 +55,12 @@ class Feed:
 
         feed_entry.focus()
 
-    def get_feed_from_url(self, *args):
+    def do_popup(self, event):
+        try:
+            self.menu(event.x_root, event.y_root)
+        finally:
+            self.menu.grab_release()
+    def get_feed_from_url(self):
         try:
 
             feed_url = self.feed_location.get()
@@ -60,7 +76,7 @@ class Feed:
         feed = feedparser.parse(file)
         return feed
 
-    def print_episode_titles(self, *args):
+    def print_episode_titles(self):
 
         print(type(self.feed_object))
         for index, episode in enumerate(self.feed_object.entries):
@@ -88,7 +104,7 @@ class Feed:
         self.select_episode_index = None
         ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode).grid(column=4, row=4, sticky=(E, S))
 
-    def show_episode_description(self, *args):
+    def show_episode_description(self):
 
         indexs = self.title_list.curselection()
         if len(indexs) ==1:
@@ -110,13 +126,6 @@ class Feed:
             self.filename_to_download.insert(0, episode.title + '.mp3')
             print(episode.title)
 
-
-    def download_episode_wrapper(self, *args):
-        q = queue.Queue()
-        progress = ttk.Progressbar(self.mainframe, orient='horizontal', mode='determinate', length=280)
-        progress.grid(column=5, row=4, sticky=(E, S))
-        update_handler = partial(self.updater, progress, q)
-
     def download(self, q, download_file, destination):
         print('working')
         response = requests.get(download_file, stream=True)
@@ -136,7 +145,7 @@ class Feed:
         pb['value'] += q.get()
     def download_complete(self):
         print('FINISHED')
-    def download_episode(self, *args):
+    def download_episode(self):
         print('hello')
         try:
             download_name = self.download_name.get()
@@ -160,7 +169,7 @@ class Feed:
                 q = queue.Queue()
                 progress = ttk.Progressbar(self.mainframe, orient='horizontal', mode='determinate', length=280 )
                 # progress.pack(padd=20)
-                progress.grid( column=5, row=4, sticky=(E, S) )
+                progress.grid( column=6, row=4, sticky=(E, S) )
                 update_handler = partial(self.updater, progress, q)
                 self.mainframe.bind('<<Progress>>', update_handler)
 
