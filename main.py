@@ -16,7 +16,7 @@ def main(rss_file, rss_file_two):
     print(feed.entries)
     print('----------')
     # for entry in feed.entries:
-    #     print(entry.title)
+    #     print(entry.title)0
     #     print(entry.published)
     #     print(entry.link)
 #   tree = ET.parse(file)

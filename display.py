@@ -1,7 +1,5 @@
-import os
-import tkinter
-
 import feedparser
+import tkinter
 from tkinter import *
 from tkinter import ttk
 from tkhtmlview import HTMLLabel
@@ -25,14 +23,7 @@ class Feed:
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
-        self.right_click = ttk.Label(root, text="Right click menu")
-        # self.right_click.pack()
-        self.menu = tkinter.Menu(root, tearoff=0)
-        self.menu.add_command(label="Cut")
-        self.menu.add_command(label="Copy")
-        self.menu.add_command(label="Paste")
-        self.menu.add_separator()
-        self.right_click.bind("<Button-3>", self.do_popup)
+
         self.title_list = Listbox(self.mainframe, height=20, width=40)
         self.title_list.bind('<<ListboxSelect>>', self.show_episode_description)
         # self.status_message = StringVar()
@@ -43,6 +34,13 @@ class Feed:
         self.feed_location = StringVar()
         feed_entry = ttk.Entry(self.mainframe, width=30, textvariable=self.feed_location)
         feed_entry.grid(column=3, row=1, sticky=(W, E))
+        feed_entry.menu = Menu(root, tearoff=0)
+        feed_entry.menu.add_command(label="Cut", command=self.do_something)
+        # self.menu.add_command(label="Copy")
+        # self.menu.add_command(label="Paste")
+        # self.menu.add_separator()
+        feed_entry.bind("<Button-3>", self.do_popup)
+        mainframe.pack()
         ttk.Label(self.mainframe, text="Feed").grid(column=2, row=1, sticky=(W, E))
         description = StringVar()
         self.description_message = ttk.Label(self.mainframe, textvariable=description, anchor='w')
@@ -55,9 +53,13 @@ class Feed:
 
         feed_entry.focus()
 
+    def do_something(self):
+        print('you clicked')
     def do_popup(self, event):
+        print('do the thing')
         try:
-            self.menu(event.x_root, event.y_root)
+            self.menu.tk_popup(event.x_root, event.y_root)
+            # self.menu()
         finally:
             self.menu.grab_release()
     def get_feed_from_url(self):
