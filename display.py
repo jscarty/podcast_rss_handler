@@ -34,12 +34,15 @@ class Feed:
         self.feed_location = StringVar()
         feed_entry = ttk.Entry(self.mainframe, width=30, textvariable=self.feed_location)
         feed_entry.grid(column=3, row=1, sticky=(W, E))
-        feed_entry.menu = Menu(root, tearoff=0)
-        feed_entry.menu.add_command(label="Cut", command=self.do_something)
-        # self.menu.add_command(label="Copy")
-        # self.menu.add_command(label="Paste")
-        # self.menu.add_separator()
-        feed_entry.bind("<Button-3>", self.do_popup)
+        
+        # Create the right-click menu
+        self.context_menu = Menu(root, tearoff=0)
+        self.context_menu.add_command(label="Cut", command=lambda: feed_entry.event_generate("<<Cut>>"))
+        self.context_menu.add_command(label="Copy", command=lambda: feed_entry.event_generate("<<Copy>>"))
+        self.context_menu.add_command(label="Paste", command=lambda: feed_entry.event_generate("<<Paste>>"))
+        
+        # Bind right-click to show menu
+        feed_entry.bind("<Button-3>", self.show_context_menu)
         mainframe.pack()
         ttk.Label(self.mainframe, text="Feed").grid(column=2, row=1, sticky=(W, E))
         description = StringVar()
@@ -53,15 +56,13 @@ class Feed:
 
         feed_entry.focus()
 
-    def do_something(self):
-        print('you clicked')
-    def do_popup(self, event):
-        print('do the thing')
+    def show_context_menu(self, event):
+        """Show the context menu at the clicked position"""
         try:
-            self.menu.tk_popup(event.x_root, event.y_root)
-            # self.menu()
+            self.context_menu.tk_popup(event.x_root, event.y_root)
         finally:
-            self.menu.grab_release()
+            self.context_menu.grab_release()
+
     def get_feed_from_url(self):
         try:
 
