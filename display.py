@@ -67,9 +67,18 @@ class Feed:
         try:
 
             feed_url = self.feed_location.get()
+            feed_url = feed_url.strip()
             feed = feedparser.parse(feed_url)
+            if 'bozo_exception' in feed:
+                failure = ttk.Label(self.mainframe, text="Collected feed", font=('', 14), background='red', relief=SUNKEN)
+                failure.place(relx=0.5, rely=0.5, anchor=CENTER)
+                self.mainframe.after(500, failure.destroy)
+                raise Exception("Could not fetch feed")
             self.feed_object = feed
 
+            success = ttk.Label(self.mainframe, text="Collected feed", font=('', 14), background='green', relief=SUNKEN)
+            success.place(relx=0.5, rely=0.5, anchor=CENTER)
+            self.mainframe.after(500, success.destroy)
             return feed
         except ValueError: "No URL provided"
         pass
@@ -107,7 +116,7 @@ class Feed:
         self.select_episode_index = None
         ttk.Button(self.mainframe, text="Download Episode", command=self.download_episode).grid(column=4, row=4, sticky=(E, S))
 
-    def show_episode_description(self):
+    def show_episode_description(self, *args):
 
         indexs = self.title_list.curselection()
         if len(indexs) ==1:
